@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hvem skal drikke?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #1a1a2e;
+    font-family: sans-serif;
+    color: white;
+    padding: 1rem;
+  }
+  #name {
+    font-size: 4rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    transition: opacity 0.2s;
+    color: black;
+  }
+  #bund-label {
+    font-size: 1.1rem;
+    color: #e94560;
+    font-weight: bold;
+    min-height: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  #emoji { font-size: 3rem; }
+  #countdown { font-size: 1.2rem; color: #aaa; margin-top: 1.5rem; }
+  #progress { width: 300px; height: 8px; background: #333; border-radius: 4px; margin-top: 0.75rem; overflow: hidden; }
+  #bar { height: 100%; background: #e94560; border-radius: 4px; transition: width 0.1s linear; }
+  button.primary {
+    margin-top: 1.5rem;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  button.primary:hover { background: #c73652; }
+  .settings {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .setting { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+  .setting label { font-size: 0.85rem; color: black; }
+  .setting input[type=range] { width: 130px; accent-color: #e94560; }
+  .setting span { font-size: 0.9rem; color: black; font-weight: bold; }
+  #chip-section {
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 420px;
+  }
+  #chip-section h3 {
+    font-size: 0.95rem;
+    color: #aaa;
+    font-weight: normal;
+    text-align: center;
+    margin-bottom: 0.75rem;
+  }
+  #chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  .chip {
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 2px solid #444;
+    background: #2a2a4a;
+    color: #aaa;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .chip.active {
+    background: #e94560;
+    border-color: #e94560;
+    color: white;
+  }
+  #active-label { margin-top: 1rem; font-size: 0.85rem; color: #666; text-align: center; }
+</style>
+</head>
+<body>
+
+<div id="name">V&#230;lg navne</div>
+<div id="bund-label"></div>
+<div id="emoji"></div>
+<div id="progress"><div id="bar" style="width:100%"></div></div>
+<div id="countdown"></div>
+
+<div class="settings">
+  <div class="setting">
+    <label>Interval</label>
+    <input type="range" id="stepRange" min="1" max="30" value="5" oninput="updateSettings()">
+    <span id="stepVal">5 sek</span>
+  </div>
+  <div class="setting">
+    <label>Varighed</label>
+    <input type="range" id="totalRange" min="10" max="300" step="5" value="60" oninput="updateSettings()">
+    <span id="totalVal">60 sek</span>
+  </div>
+</div>
+
+<button class="primary" onclick="start()">Start</button>
+
+<div id="chip-section">
+  <h3>V&#230;lg deltagere</h3>
+  <div id="chips"></div>
+  <div id="active-label">Ingen valgt</div>
+</div>
+
+<script>
+  const allNames = [
+    'Fred','SEB','Larsen','Jos\u00e9','matty-natty',
+    'ABC','Vadmand','Nico','Morten','Okke','Kimose',
+    'Daniel','Gesser','Emil','J\u00f8rgensen','Jepsen','Espersen',
+    'marcuzz','cille'
+  ];
+
+  const active = new Set();
+  let STEP = 5, TOTAL = 60;
+  let audioCtx = null;
+
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function playPop() {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.05);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.15);
+  }
+
+  function playFanfare() {
+    const ctx = getAudioCtx();
+    const notes = [523, 659, 784, 1047, 784, 1047];
+    const times = [0, 0.15, 0.3, 0.45, 0.65, 0.8];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + times[i];
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.4, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      osc.start(t);
+      osc.stop(t + 0.3);
+    });
+  }
+
+  function speakName(name, isFinal) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const msg = new SpeechSynthesisUtterance();
+    msg.text = isFinal ? name + ' skal bunde!' : name;
+    msg.lang = 'da-DK';
+    msg.rate = isFinal ? 0.9 : 1.1;
+    msg.pitch = isFinal ? 0.8 : 1.1;
+    window.speechSynthesis.speak(msg);
+  }
+
+  function updateSettings() {
+    STEP = parseInt(document.getElementById('stepRange').value);
+    TOTAL = parseInt(document.getElementById('totalRange').value);
+    document.getElementById('stepVal').textContent = STEP + ' sek';
+    document.getElementById('totalVal').textContent = TOTAL + ' sek';
+  }
+
+  const chipsEl = document.getElementById('chips');
+  allNames.forEach(name => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = name;
+    chip.onclick = () => {
+      if (active.has(name)) { active.delete(name); chip.classList.remove('active'); }
+      else { active.add(name); chip.classList.add('active'); }
+      updateLabel();
+    };
+    chipsEl.appendChild(chip);
+  });
+
+  function updateLabel() {
+    const el = document.getElementById('active-label');
+    if (active.size === 0) {
+      el.textContent = 'Ingen valgt';
+      document.getElementById('name').textContent = 'V\u00e6lg navne';
+      document.getElementById('emoji').textContent = '';
+    } else {
+      el.textContent = active.size + ' valgt';
+    }
+  }
+
+  let interval, timeout, tick;
+
+  function pick(isFinal) {
+    const persons = [...active];
+    const el = document.getElementById('name');
+    el.style.opacity = 0;
+    setTimeout(() => {
+      const chosen = persons[Math.floor(Math.random() * persons.length)];
+      el.textContent = chosen;
+      document.getElementById('emoji').textContent = isFinal ? '\uD83D\uDC80' : '\uD83C\uDF7A';
+      document.getElementById('bund-label').textContent = isFinal ? chosen + ' skal BUNDE! \uD83D\uDC80\uD83C\uDF7A' : '';
+      el.style.opacity = 1;
+      if (isFinal) {
+        playFanfare();
+        setTimeout(() => speakName(chosen, true), 900);
+      } else {
+        playPop();
+        speakName(chosen, false);
+      }
+    }, 200);
+  }
+
+  function start() {
+    if (active.size === 0) { alert('V\u00e6lg mindst \u00e9t navn f\u00f8rst!'); return; }
+    getAudioCtx();
+    clearInterval(interval); clearInterval(tick); clearTimeout(timeout);
+    document.getElementById('bund-label').textContent = '';
+    let elapsed = 0;
+    pick(false); updateBar(0);
+    document.getElementById('countdown').textContent = 'Stopper om ' + TOTAL + ' sek';
+    interval = setInterval(() => pick(false), STEP * 1000);
+    tick = setInterval(() => {
+      elapsed += 0.1;
+      updateBar(Math.min((elapsed % STEP) / STEP * 100, 100));
+      document.getElementById('countdown').textContent = 'Stopper om ' + Math.ceil(Math.max(0, TOTAL - elapsed)) + ' sek';
+    }, 100);
+    timeout = setTimeout(() => {
+      clearInterval(interval); clearInterval(tick);
+      pick(true);
+      document.getElementById('countdown').textContent = 'F\u00e6rdig! \uD83C\uDF89';
+      updateBar(100);
+    }, TOTAL * 1000);
+  }
+
+  function updateBar(pct) {
+    document.getElementById('bar').style.width = pct + '%';
+  }
+</script>
+</body>
+</html>
