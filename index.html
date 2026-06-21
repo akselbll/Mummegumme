@@ -386,6 +386,16 @@
     updateBar(100);
     pick(true);
     document.getElementById('countdown').textContent = 'Færdig! \uD83C\uDF89';
+    lockControls(false);
+  }
+
+  function lockControls(locked) {
+    document.getElementById('stepRange').disabled = locked;
+    document.getElementById('totalRange').disabled = locked;
+    document.getElementById('modeCheck').disabled = locked;
+    document.querySelector('.settings').style.opacity = locked ? '0.4' : '1';
+    document.getElementById('mode-toggle').style.opacity = locked ? '0.4' : '1';
+    document.getElementById('mode-toggle').style.pointerEvents = locked ? 'none' : '';
   }
 
   function start() {
@@ -396,24 +406,35 @@
     document.getElementById('bund-label').textContent = '';
     document.getElementById('task-label').textContent = '';
     document.getElementById('progress').style.display = '';
+    lockControls(true);
 
     if (isUnhinged) { startUnhinged(); return; }
 
-    let elapsed = 0;
+    const totalStart = Date.now();
+    let roundStart = Date.now();
     pick(false); updateBar(0);
     document.getElementById('countdown').textContent = 'Stopper om ' + TOTAL + ' sek';
-    interval = setInterval(() => pick(false), STEP*1000);
+
+    interval = setInterval(() => {
+      pick(false);
+      roundStart = Date.now();
+    }, STEP * 1000);
+
     tick = setInterval(() => {
-      elapsed += 0.1;
-      updateBar(Math.min((elapsed%STEP)/STEP*100,100));
-      document.getElementById('countdown').textContent = 'Stopper om ' + Math.ceil(Math.max(0,TOTAL-elapsed)) + ' sek';
+      const roundElapsed = (Date.now() - roundStart) / 1000;
+      const totalElapsed = (Date.now() - totalStart) / 1000;
+      updateBar(Math.min(roundElapsed / STEP * 100, 100));
+      const left = Math.max(0, TOTAL - totalElapsed);
+      document.getElementById('countdown').textContent = 'Stopper om ' + Math.ceil(left) + ' sek';
     }, 100);
+
     timeout = setTimeout(() => {
       clearInterval(interval); clearInterval(tick);
       pick(true);
       document.getElementById('countdown').textContent = 'Færdig! \uD83C\uDF89';
       updateBar(100);
-    }, TOTAL*1000);
+      lockControls(false);
+    }, TOTAL * 1000);
   }
 
   function updateBar(pct) { document.getElementById('bar').style.width = pct+'%'; }
