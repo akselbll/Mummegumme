@@ -390,6 +390,7 @@
 
   function start() {
     if (active.size === 0) { alert('Vælg mindst ét navn først!'); return; }
+    window.scrollTo({top: 0, behavior: 'smooth'});
     getAudioCtx();
     clearInterval(interval); clearInterval(tick); clearTimeout(timeout);
     document.getElementById('bund-label').textContent = '';
