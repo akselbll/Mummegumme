@@ -4,262 +4,332 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mummegumme</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    margin: 0;
+    min-height: 100vh;
+    background: #0d0d0d;
+    font-family: 'Inter', sans-serif;
+    color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: #1a1a2e;
-    font-family: sans-serif;
-    color: white;
-    padding: 1rem;
+    padding: 0 1rem 3rem;
+    overflow-x: hidden;
   }
-  h1 { font-size: 1.4rem; color: #e94560; margin: 0 0 1rem; letter-spacing: 2px; text-transform: uppercase; }
-  #name {
-    font-size: 4rem;
-    font-weight: bold;
+
+  /* Animated gradient background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(230,80,30,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(255,160,0,0.1) 0%, transparent 55%),
+                radial-gradient(ellipse at 60% 80%, rgba(180,20,40,0.12) 0%, transparent 50%);
+    animation: bgPulse 8s ease-in-out infinite alternate;
+    z-index: 0;
+    pointer-events: none;
+  }
+  @keyframes bgPulse {
+    0%   { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  /* Grain texture overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .content { position: relative; z-index: 1; width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; }
+
+  /* Hero */
+  .hero {
+    width: 100%;
     text-align: center;
-    margin-bottom: 0.25rem;
-    transition: opacity 0.2s;
+    padding: 2.5rem 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 15vw, 6rem);
+    letter-spacing: 4px;
+    line-height: 1;
+    background: linear-gradient(135deg, #ff6b35, #ffa500, #ff3860);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+  }
+  .hero .tagline {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+  }
+
+  /* Game display */
+  #name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 18vw, 5.5rem);
+    text-align: center;
+    letter-spacing: 2px;
+    line-height: 1;
+    transition: opacity 0.15s;
     color: white;
+    text-shadow: 0 0 40px rgba(255,107,53,0.4);
+  }
+  #name.unhinged-active {
+    background: linear-gradient(135deg, #ff3860, #ff6b35);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
   }
   #task-label {
-    font-size: 1.2rem;
-    color: #f4a261;
-    font-weight: bold;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffa500;
     min-height: 1.8rem;
     text-align: center;
-    margin-bottom: 0.25rem;
+    margin-top: 0.5rem;
     padding: 0 1rem;
+    letter-spacing: 0.5px;
   }
   #bund-label {
-    font-size: 1.1rem;
-    color: #e94560;
-    font-weight: bold;
-    min-height: 1.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #ff3860;
+    font-weight: 700;
+    min-height: 1.4rem;
     text-align: center;
+    margin-top: 0.25rem;
   }
-  #emoji { font-size: 3rem; }
-  #countdown { font-size: 1.2rem; color: #aaa; margin-top: 1.5rem; }
-  #progress { width: 300px; height: 8px; background: #333; border-radius: 4px; margin-top: 0.75rem; overflow: hidden; }
-  #bar { height: 100%; background: #e94560; border-radius: 4px; transition: width 0.1s linear; }
+  #emoji { font-size: 2.5rem; margin-top: 0.5rem; }
+
+  /* Progress */
+  #progress {
+    width: 100%;
+    max-width: 320px;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    margin-top: 1.25rem;
+    overflow: hidden;
+  }
+  #bar {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b35, #ffa500);
+    border-radius: 4px;
+    transition: width 0.1s linear;
+  }
+  #countdown { font-size: 0.9rem; color: rgba(255,255,255,0.35); margin-top: 0.5rem; letter-spacing: 1px; }
 
   /* Mode toggle */
   #mode-toggle {
-    margin-top: 1.25rem;
+    margin-top: 1.5rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.5);
   }
-  .toggle-switch {
-    position: relative;
-    width: 52px;
-    height: 28px;
-  }
+  .toggle-switch { position: relative; width: 48px; height: 26px; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; }
   .slider-track {
-    position: absolute;
-    cursor: pointer;
-    inset: 0;
-    background: #333;
-    border-radius: 28px;
-    transition: background 0.3s;
+    position: absolute; cursor: pointer; inset: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 26px; transition: background 0.3s;
   }
   .slider-track:before {
-    content: '';
-    position: absolute;
-    width: 22px; height: 22px;
-    left: 3px; top: 3px;
-    background: white;
-    border-radius: 50%;
-    transition: transform 0.3s;
+    content: ''; position: absolute;
+    width: 20px; height: 20px; left: 3px; top: 3px;
+    background: white; border-radius: 50%; transition: transform 0.3s;
   }
-  input:checked + .slider-track { background: #e94560; }
-  input:checked + .slider-track:before { transform: translateX(24px); }
-  #mode-label { color: #aaa; transition: color 0.3s; }
-  #mode-label.unhinged { color: #e94560; font-weight: bold; }
+  input:checked + .slider-track { background: #ff3860; }
+  input:checked + .slider-track:before { transform: translateX(22px); }
+  #mode-label { transition: color 0.3s; }
+  #mode-label.unhinged { color: #ff3860; font-weight: 700; }
 
+  /* Settings */
   .settings {
     margin-top: 1.25rem;
     display: flex;
-    gap: 1.5rem;
+    gap: 2rem;
     flex-wrap: wrap;
     justify-content: center;
   }
-  .setting { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
-  .setting label { font-size: 0.85rem; color: white; }
-  .setting input[type=range] { width: 130px; accent-color: #e94560; }
-  .setting span { font-size: 0.9rem; color: white; font-weight: bold; }
+  .setting { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+  .setting label { font-size: 0.75rem; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-transform: uppercase; }
+  .setting input[type=range] { width: 120px; accent-color: #ff6b35; }
+  .setting span { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 600; }
 
+  /* Start button */
   button.primary {
-    margin-top: 1.25rem;
-    padding: 0.75rem 2rem;
-    font-size: 1rem;
-    background: #e94560;
+    margin-top: 1.5rem;
+    padding: 0.9rem 3rem;
+    font-size: 1.1rem;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, #ff6b35, #ff3860);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 50px;
     cursor: pointer;
+    box-shadow: 0 4px 24px rgba(255,107,53,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
   }
-  button.primary:hover { background: #c73652; }
+  button.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,107,53,0.5); }
+  button.primary:active { transform: translateY(0); }
 
-  #chip-section {
-    margin-top: 1.5rem;
+  /* Divider */
+  .divider {
     width: 100%;
-    max-width: 460px;
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 1.75rem 0 1.25rem;
   }
+
+  /* Chip section */
+  #chip-section { width: 100%; }
   #chip-section h3 {
-    font-size: 0.95rem;
-    color: #aaa;
-    font-weight: normal;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+    font-weight: 600;
     text-align: center;
-    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
   }
   #add-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
   #nameInput {
-    flex: 1;
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    border: 2px solid #444;
-    background: #2a2a4a;
-    color: white;
-    font-size: 1rem;
-    outline: none;
+    flex: 1; padding: 0.55rem 0.9rem;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: white; font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s;
   }
-  #nameInput:focus { border-color: #e94560; }
+  #nameInput::placeholder { color: rgba(255,255,255,0.25); }
+  #nameInput:focus { border-color: #ff6b35; }
   #addBtn {
-    padding: 0.5rem 1rem;
-    background: #e94560;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
+    padding: 0.55rem 1.1rem;
+    background: rgba(255,107,53,0.2);
+    color: #ff6b35;
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: 50px;
+    font-size: 1.2rem;
     cursor: pointer;
+    transition: background 0.2s;
   }
-  #addBtn:hover { background: #c73652; }
-  #chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-  }
+  #addBtn:hover { background: rgba(255,107,53,0.35); }
+  #chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
   .chip {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.4rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
+    display: flex; align-items: center; gap: 0.35rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
     cursor: pointer;
-    border: 2px solid #444;
-    background: #2a2a4a;
-    color: #aaa;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.45);
     transition: all 0.15s;
     user-select: none;
   }
-  .chip.active { background: #e94560; border-color: #e94560; color: white; }
-  .chip .remove { font-size: 0.75rem; opacity: 0.7; margin-left: 2px; }
-  .chip .remove:hover { opacity: 1; }
-  #active-label { margin-top: 0.75rem; font-size: 0.85rem; color: #666; text-align: center; }
-  #save-hint { margin-top: 0.4rem; font-size: 0.78rem; color: #555; text-align: center; }
+  .chip:hover { border-color: rgba(255,107,53,0.4); color: rgba(255,255,255,0.7); }
+  .chip.active { background: rgba(255,107,53,0.2); border-color: #ff6b35; color: white; }
+  .chip .remove { font-size: 0.7rem; opacity: 0.5; margin-left: 2px; }
+  .chip .remove:hover { opacity: 1; color: #ff3860; }
+  #active-label { margin-top: 0.75rem; font-size: 0.78rem; color: rgba(255,255,255,0.25); text-align: center; letter-spacing: 1px; }
+  #save-hint { margin-top: 0.3rem; font-size: 0.72rem; color: rgba(255,255,255,0.15); text-align: center; }
 </style>
 </head>
 <body>
+<div class="content">
 
-<h1>Mummegumme</h1>
-<div id="name">Vælg navne</div>
-<div id="task-label"></div>
-<div id="bund-label"></div>
-<div id="emoji"></div>
-<div id="progress"><div id="bar" style="width:100%"></div></div>
-<div id="countdown"></div>
-
-<div id="mode-toggle">
-  <span>Normal</span>
-  <label class="toggle-switch">
-    <input type="checkbox" id="modeCheck" onchange="toggleMode()">
-    <span class="slider-track"></span>
-  </label>
-  <span id="mode-label">Unhinged</span>
-</div>
-
-<div class="settings">
-  <div class="setting">
-    <label>Interval</label>
-    <input type="range" id="stepRange" min="1" max="30" value="5" oninput="updateSettings()">
-    <span id="stepVal">5 sek</span>
+  <div class="hero">
+    <h1>Mummegumme</h1>
+    <div class="tagline">Ingen slipper tørt fra det</div>
   </div>
-  <div class="setting">
-    <label>Varighed</label>
-    <input type="range" id="totalRange" min="10" max="300" step="5" value="60" oninput="updateSettings()">
-    <span id="totalVal">60 sek</span>
-  </div>
-</div>
 
-<button class="primary" onclick="start()">Start</button>
+  <div id="name">Vælg navne</div>
+  <div id="task-label"></div>
+  <div id="bund-label"></div>
+  <div id="emoji"></div>
+  <div id="progress"><div id="bar" style="width:100%"></div></div>
+  <div id="countdown"></div>
 
-<div id="chip-section">
-  <h3>Deltagere</h3>
-  <div id="add-row">
-    <input type="text" id="nameInput" placeholder="Tilføj navn..." onkeydown="if(event.key==='Enter')addName()">
-    <button id="addBtn" onclick="addName()">+</button>
+  <div id="mode-toggle">
+    <span>Normal</span>
+    <label class="toggle-switch">
+      <input type="checkbox" id="modeCheck" onchange="toggleMode()">
+      <span class="slider-track"></span>
+    </label>
+    <span id="mode-label">Unhinged</span>
   </div>
-  <div id="chips"></div>
-  <div id="active-label">Ingen valgt</div>
-  <div id="save-hint"></div>
+
+  <div class="settings">
+    <div class="setting">
+      <label>Interval</label>
+      <input type="range" id="stepRange" min="1" max="30" value="5" oninput="updateSettings()">
+      <span id="stepVal">5 sek</span>
+    </div>
+    <div class="setting">
+      <label>Varighed</label>
+      <input type="range" id="totalRange" min="10" max="300" step="5" value="60" oninput="updateSettings()">
+      <span id="totalVal">60 sek</span>
+    </div>
+  </div>
+
+  <button class="primary" onclick="start()">Start</button>
+
+  <hr class="divider">
+
+  <div id="chip-section">
+    <h3>Deltagere</h3>
+    <div id="add-row">
+      <input type="text" id="nameInput" placeholder="Tilføj navn..." onkeydown="if(event.key==='Enter')addName()">
+      <button id="addBtn" onclick="addName()">+</button>
+    </div>
+    <div id="chips"></div>
+    <div id="active-label">Ingen valgt</div>
+    <div id="save-hint"></div>
+  </div>
+
 </div>
 
 <script>
-  // --- Unhinged tasks ---
   const unhingedTasks = [
-    'BUNDE!',
-    'Alle drikker!',
-    'Vælg en der skal bunde med dig!',
-    'De to ved siden af dig drikker!',
-    'Du bestemmer en regel resten af runden!',
-    'Byt drink med naboen og drik den!',
-    'Alle med åbent hår drikker!',
+    'BUNDE!','Alle drikker!','Vælg en der skal bunde med dig!',
+    'De to ved siden af dig drikker!','Du bestemmer en regel resten af runden!',
+    'Byt drink med naboen og drik den!','Alle med åbent hår drikker!',
     'Sæt en regel — bryder nogen den, bunder de!',
     'Ring til en der ikke er her — de bestemmer hvem der drikker!',
-    'Sidste der rejser sig drikker!',
-    'BUNDE!',
-    'Alle drikker dobbelt!',
-    'Du vælger to der skal bunde!',
-    'BUNDE — og tag en til med!',
+    'Sidste der rejser sig drikker!','BUNDE!','Alle drikker dobbelt!',
+    'Du vælger to der skal bunde!','BUNDE — og tag en til med!',
     'Fortæl en hemmelighed eller bund!',
   ];
 
-  // --- State ---
   const STORAGE_KEY = 'mummegumme_names';
   let allNames = [];
   const active = new Set();
-  let STEP = 5, TOTAL = 60;
-  let isUnhinged = false;
-  let audioCtx = null;
+  let STEP = 5, TOTAL = 60, isUnhinged = false, audioCtx = null;
 
-  // --- Load saved names ---
   function loadNames() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) allNames = JSON.parse(saved);
-    } catch(e) {}
-    if (allNames.length === 0) {
-      allNames = ['ABC','cille','Daniel','Emil','Emse','Espersen','Fred','Gesser','Jepsen','José','Jørgensen','Kimose','Larsen','marcuzz','matty-natty','Morten','Nico','Okke','SEB','Vadmand'];
-    }
+    try { const s = localStorage.getItem(STORAGE_KEY); if (s) allNames = JSON.parse(s); } catch(e) {}
+    if (!allNames.length) allNames = ['ABC','cille','Daniel','Emil','Emse','Espersen','Fred','Gesser','Jepsen','José','Jørgensen','Kimose','Larsen','marcuzz','matty-natty','Morten','Nico','Okke','SEB','Vadmand'];
     renderChips();
   }
+  function saveNames() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allNames)); } catch(e) {} }
 
-  function saveNames() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allNames)); } catch(e) {}
-  }
-
-  // --- Chips ---
   function renderChips() {
     const el = document.getElementById('chips');
     el.innerHTML = '';
@@ -267,56 +337,39 @@
       const chip = document.createElement('div');
       chip.className = 'chip' + (active.has(name) ? ' active' : '');
       chip.innerHTML = name + '<span class="remove" onclick="event.stopPropagation();removeName(\'' + name.replace(/'/g,"\\'") + '\')">&#x2715;</span>';
-      chip.onclick = () => toggleActive(name, chip);
+      chip.onclick = () => { if(active.has(name)){active.delete(name);chip.classList.remove('active');}else{active.add(name);chip.classList.add('active');} updateLabel(); };
       el.appendChild(chip);
     });
-    updateLabel();
-  }
-
-  function toggleActive(name, chip) {
-    if (active.has(name)) { active.delete(name); chip.classList.remove('active'); }
-    else { active.add(name); chip.classList.add('active'); }
     updateLabel();
   }
 
   function addName() {
     const input = document.getElementById('nameInput');
     const name = input.value.trim();
-    if (!name || allNames.includes(name)) { input.value = ''; return; }
+    if (!name || allNames.includes(name)) { input.value=''; return; }
     allNames.push(name);
     allNames.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
     active.add(name);
-    saveNames();
-    input.value = '';
-    renderChips();
+    saveNames(); input.value=''; renderChips();
   }
 
   function removeName(name) {
     allNames = allNames.filter(n => n !== name);
-    active.delete(name);
-    saveNames();
-    renderChips();
+    active.delete(name); saveNames(); renderChips();
   }
 
   function updateLabel() {
-    const el = document.getElementById('active-label');
-    el.textContent = active.size === 0 ? 'Ingen valgt' : active.size + ' valgt';
-    if (active.size === 0) {
-      document.getElementById('name').textContent = 'Vælg navne';
-      document.getElementById('emoji').textContent = '';
-    }
-    document.getElementById('save-hint').textContent = allNames.length > 0 ? 'Navne gemmes automatisk til næste gang' : '';
+    document.getElementById('active-label').textContent = active.size === 0 ? 'Ingen valgt' : active.size + ' valgt';
+    document.getElementById('save-hint').textContent = allNames.length ? 'Navne gemmes automatisk' : '';
+    if (active.size === 0) { document.getElementById('name').textContent = 'Vælg navne'; document.getElementById('emoji').textContent = ''; }
   }
 
-  // --- Mode ---
   function toggleMode() {
     isUnhinged = document.getElementById('modeCheck').checked;
     const label = document.getElementById('mode-label');
-    label.textContent = 'Unhinged';
     label.className = isUnhinged ? 'unhinged' : '';
   }
 
-  // --- Settings ---
   function updateSettings() {
     STEP = parseInt(document.getElementById('stepRange').value);
     TOTAL = parseInt(document.getElementById('totalRange').value);
@@ -324,55 +377,37 @@
     document.getElementById('totalVal').textContent = TOTAL + ' sek';
   }
 
-  // --- Audio ---
-  function getAudioCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    return audioCtx;
-  }
+  function getAudioCtx() { if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
 
   function playPop() {
-    const ctx = getAudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+    const ctx = getAudioCtx(), osc = ctx.createOscillator(), gain = ctx.createGain();
     osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(600, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.05);
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.15);
+    osc.type='sine'; osc.frequency.setValueAtTime(600,ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(900,ctx.currentTime+0.05);
+    gain.gain.setValueAtTime(0.3,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.15);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.15);
   }
 
   function playUnhingedPop() {
     const ctx = getAudioCtx();
-    [0, 0.08, 0.16].forEach((delay, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+    [0,0.08,0.16].forEach((delay,i) => {
+      const osc=ctx.createOscillator(), gain=ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'sawtooth';
-      osc.frequency.value = 400 + i * 150;
-      const t = ctx.currentTime + delay;
-      gain.gain.setValueAtTime(0.2, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-      osc.start(t); osc.stop(t + 0.12);
+      osc.type='sawtooth'; osc.frequency.value=400+i*150;
+      const t=ctx.currentTime+delay;
+      gain.gain.setValueAtTime(0.2,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+      osc.start(t); osc.stop(t+0.12);
     });
   }
 
   function playFanfare() {
     const ctx = getAudioCtx();
-    const notes = [523, 659, 784, 1047, 784, 1047];
-    const times = [0, 0.15, 0.3, 0.45, 0.65, 0.8];
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+    [523,659,784,1047,784,1047].forEach((freq,i) => {
+      const osc=ctx.createOscillator(), gain=ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'triangle';
-      osc.frequency.value = freq;
-      const t = ctx.currentTime + times[i];
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.4, t + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
-      osc.start(t); osc.stop(t + 0.3);
+      osc.type='triangle'; osc.frequency.value=freq;
+      const t=ctx.currentTime+[0,0.15,0.3,0.45,0.65,0.8][i];
+      gain.gain.setValueAtTime(0,t); gain.gain.linearRampToValueAtTime(0.4,t+0.05); gain.gain.exponentialRampToValueAtTime(0.001,t+0.25);
+      osc.start(t); osc.stop(t+0.3);
     });
   }
 
@@ -383,13 +418,10 @@
     if (isFinal && !isUnhinged) msg.text = name + ' skal bunde!';
     else if (task) msg.text = name + '! ' + task;
     else msg.text = name;
-    msg.lang = 'da-DK';
-    msg.rate = isFinal ? 0.85 : 1.05;
-    msg.pitch = isFinal ? 0.8 : 1.1;
+    msg.lang='da-DK'; msg.rate=isFinal?0.85:1.05; msg.pitch=isFinal?0.8:1.1;
     window.speechSynthesis.speak(msg);
   }
 
-  // --- Game ---
   let interval, timeout, tick;
 
   function pick(isFinal) {
@@ -397,23 +429,16 @@
     const el = document.getElementById('name');
     el.style.opacity = 0;
     setTimeout(() => {
-      const chosen = persons[Math.floor(Math.random() * persons.length)];
-      let task = null;
-      if (isUnhinged) {
-        task = unhingedTasks[Math.floor(Math.random() * unhingedTasks.length)];
-      }
+      const chosen = persons[Math.floor(Math.random()*persons.length)];
+      const task = isUnhinged ? unhingedTasks[Math.floor(Math.random()*unhingedTasks.length)] : null;
       el.textContent = chosen;
+      el.className = isUnhinged ? 'unhinged-active' : '';
       document.getElementById('task-label').textContent = task || '';
       document.getElementById('emoji').textContent = isFinal ? '\uD83D\uDC80' : (isUnhinged ? '\uD83D\uDD25' : '\uD83C\uDF7A');
       document.getElementById('bund-label').textContent = isFinal && !isUnhinged ? chosen + ' skal BUNDE! \uD83D\uDC80\uD83C\uDF7A' : '';
       el.style.opacity = 1;
-      if (isFinal) {
-        playFanfare();
-        setTimeout(() => speakName(chosen, task, true), 900);
-      } else {
-        isUnhinged ? playUnhingedPop() : playPop();
-        speakName(chosen, task, false);
-      }
+      if (isFinal) { playFanfare(); setTimeout(() => speakName(chosen, task, true), 900); }
+      else { isUnhinged ? playUnhingedPop() : playPop(); speakName(chosen, task, false); }
     }, 200);
   }
 
@@ -426,25 +451,22 @@
     let elapsed = 0;
     pick(false); updateBar(0);
     document.getElementById('countdown').textContent = 'Stopper om ' + TOTAL + ' sek';
-    interval = setInterval(() => pick(false), STEP * 1000);
+    interval = setInterval(() => pick(false), STEP*1000);
     tick = setInterval(() => {
       elapsed += 0.1;
-      updateBar(Math.min((elapsed % STEP) / STEP * 100, 100));
-      document.getElementById('countdown').textContent = 'Stopper om ' + Math.ceil(Math.max(0, TOTAL - elapsed)) + ' sek';
+      updateBar(Math.min((elapsed%STEP)/STEP*100,100));
+      document.getElementById('countdown').textContent = 'Stopper om ' + Math.ceil(Math.max(0,TOTAL-elapsed)) + ' sek';
     }, 100);
     timeout = setTimeout(() => {
       clearInterval(interval); clearInterval(tick);
       pick(true);
       document.getElementById('countdown').textContent = 'Færdig! \uD83C\uDF89';
       updateBar(100);
-    }, TOTAL * 1000);
+    }, TOTAL*1000);
   }
 
-  function updateBar(pct) {
-    document.getElementById('bar').style.width = pct + '%';
-  }
+  function updateBar(pct) { document.getElementById('bar').style.width = pct+'%'; }
 
-  // --- Init ---
   loadNames();
 </script>
 </body>
