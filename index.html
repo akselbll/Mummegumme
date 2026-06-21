@@ -125,7 +125,11 @@
   button.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 0 #922b21; }
   button.primary:active { transform: translateY(2px); box-shadow: 0 1px 0 #922b21; }
 
-  button#nextBtn {
+  button.primary.stop {
+    background: #5a1a1a;
+    box-shadow: 0 3px 0 #3a0d0d;
+  }
+  button.primary.stop:hover { box-shadow: 0 4px 0 #3a0d0d; }
     padding: 0.9rem 1.5rem;
     font-size: 1.2rem;
     font-family: 'Bebas Neue', sans-serif;
@@ -224,7 +228,7 @@
   </div>
 
   <div class="btn-row">
-    <button class="primary" onclick="start()">Start</button>
+    <button class="primary" id="startStopBtn" onclick="handleStartStop()">Start</button>
     <button id="nextBtn" onclick="nextUnhinged()">Næste →</button>
   </div>
 
@@ -387,9 +391,37 @@
     pick(true);
     document.getElementById('countdown').textContent = 'Færdig! \uD83C\uDF89';
     lockControls(false);
+    setBtn(false);
   }
 
-  function lockControls(locked) {
+  function setBtn(running) {
+    const btn = document.getElementById('startStopBtn');
+    if (running) { btn.textContent = 'Stop'; btn.classList.add('stop'); }
+    else { btn.textContent = 'Start'; btn.classList.remove('stop'); }
+  }
+
+  function handleStartStop() {
+    const btn = document.getElementById('startStopBtn');
+    if (btn.classList.contains('stop')) { resetGame(); } else { start(); }
+  }
+
+  function resetGame() {
+    clearInterval(interval); clearInterval(tick); clearTimeout(timeout);
+    unhingedRunning = false;
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('name').textContent = 'Vælg navne';
+    document.getElementById('name').className = '';
+    document.getElementById('task-label').textContent = '';
+    document.getElementById('bund-label').textContent = '';
+    document.getElementById('emoji').textContent = '';
+    document.getElementById('countdown').textContent = '';
+    document.getElementById('progress').style.display = 'none';
+    updateBar(0);
+    lockControls(false);
+    setBtn(false);
+  }
+
+  
     document.getElementById('stepRange').disabled = locked;
     document.getElementById('totalRange').disabled = locked;
     document.getElementById('modeCheck').disabled = locked;
@@ -407,7 +439,7 @@
     document.getElementById('task-label').textContent = '';
     document.getElementById('progress').style.display = '';
     lockControls(true);
-
+    setBtn(true);
     if (isUnhinged) { startUnhinged(); return; }
 
     const totalStart = Date.now();
@@ -434,6 +466,7 @@
       document.getElementById('countdown').textContent = 'Færdig! \uD83C\uDF89';
       updateBar(100);
       lockControls(false);
+      setBtn(false);
     }, TOTAL * 1000);
   }
 
