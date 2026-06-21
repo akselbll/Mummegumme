@@ -252,8 +252,8 @@
   <div id="chip-section">
     <h3>Deltagere</h3>
     <div id="add-row">
-      <input type="text" id="nameInput" placeholder="Tilføj navn..." onkeydown="if(event.key==='Enter'){event.preventDefault();addName()}" autocomplete="off" autocorrect="off" autocapitalize="words">
-      <button id="addBtn" type="button" onclick="addName()">+</button>
+      <input type="text" id="nameInput" placeholder="Tilføj navn..." autocomplete="off" autocorrect="off" autocapitalize="words">
+      <button id="addBtn" type="button">+</button>
     </div>
     <div id="chips"></div>
     <div id="active-label">Ingen valgt</div>
@@ -292,8 +292,15 @@
 
   function loadNames() {
     try { const s = localStorage.getItem(STORAGE_KEY); if (s) allNames = JSON.parse(s); } catch(e) {}
-    if (!allNames.length) allNames = ['ABC','cille','Daniel','Emil','Emse','Espersen','Fred','Gesser','Jepsen','José','Jørgensen','Kimose','Larsen','marcuzz','matty-natty','Morten','Nico','Okke','SEB','Vadmand'];
     renderChips();
+
+    // Attach events here so they always fire regardless of browser quirks
+    const btn = document.getElementById('addBtn');
+    const input = document.getElementById('nameInput');
+
+    btn.addEventListener('click', function(e) { e.preventDefault(); addName(); });
+    btn.addEventListener('touchend', function(e) { e.preventDefault(); addName(); });
+    input.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); addName(); } });
   }
   function saveNames() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allNames)); } catch(e) {} }
 
@@ -313,10 +320,13 @@
   function addName() {
     const input = document.getElementById('nameInput');
     const name = (input.value || '').trim();
-    if (!name || allNames.includes(name)) { input.value=''; return; }
+    if (!name || allNames.includes(name)) { input.value = ''; return; }
     allNames.push(name);
-    allNames.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-    active.add(name); saveNames(); input.value=''; input.blur(); renderChips();
+    allNames.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    active.add(name);
+    saveNames();
+    input.value = '';
+    renderChips();
   }
 
   function removeName(name) {
