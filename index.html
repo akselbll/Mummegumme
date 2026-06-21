@@ -229,7 +229,7 @@
 
   <div class="btn-row">
     <button class="primary" id="startStopBtn" onclick="handleStartStop()">Start</button>
-    <button id="nextBtn" onclick="nextUnhinged()">Næste →</button>
+    <button id="nextBtn" type="button" onclick="nextUnhinged()" style="display:none">Næste →</button>
   </div>
 
   <hr class="divider">
@@ -237,8 +237,8 @@
   <div id="chip-section">
     <h3>Deltagere</h3>
     <div id="add-row">
-      <input type="text" id="nameInput" placeholder="Tilføj navn..." onkeydown="if(event.key==='Enter')addName()">
-      <button id="addBtn" onclick="addName()">+</button>
+      <input type="text" id="nameInput" placeholder="Tilføj navn..." onkeydown="if(event.key==='Enter'){event.preventDefault();addName()}" autocomplete="off" autocorrect="off" autocapitalize="words">
+      <button id="addBtn" type="button" onclick="addName()">+</button>
     </div>
     <div id="chips"></div>
     <div id="active-label">Ingen valgt</div>
@@ -293,11 +293,11 @@
 
   function addName() {
     const input = document.getElementById('nameInput');
-    const name = input.value.trim();
+    const name = (input.value || '').trim();
     if (!name || allNames.includes(name)) { input.value=''; return; }
     allNames.push(name);
     allNames.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-    active.add(name); saveNames(); input.value=''; renderChips();
+    active.add(name); saveNames(); input.value=''; input.blur(); renderChips();
   }
 
   function removeName(name) {
