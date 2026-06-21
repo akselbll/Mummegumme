@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     min-height: 100vh;
     background: #0d0d0d;
@@ -19,8 +18,6 @@
     padding: 0 1rem 3rem;
     overflow-x: hidden;
   }
-
-  /* Animated gradient background */
   body::before {
     content: '';
     position: fixed;
@@ -29,221 +26,98 @@
                 radial-gradient(ellipse at 80% 20%, rgba(255,160,0,0.1) 0%, transparent 55%),
                 radial-gradient(ellipse at 60% 80%, rgba(180,20,40,0.12) 0%, transparent 50%);
     animation: bgPulse 8s ease-in-out infinite alternate;
-    z-index: 0;
-    pointer-events: none;
+    z-index: 0; pointer-events: none;
   }
-  @keyframes bgPulse {
-    0%   { opacity: 0.6; }
-    100% { opacity: 1; }
-  }
-
-  /* Grain texture overlay */
+  @keyframes bgPulse { 0% { opacity: 0.6; } 100% { opacity: 1; } }
   body::after {
     content: '';
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    opacity: 0.4;
-    z-index: 0;
-    pointer-events: none;
+    opacity: 0.4; z-index: 0; pointer-events: none;
   }
-
   .content { position: relative; z-index: 1; width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; }
-
-  /* Hero */
-  .hero {
-    width: 100%;
-    text-align: center;
-    padding: 2.5rem 1rem 1.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    margin-bottom: 1.5rem;
-  }
+  .hero { width: 100%; text-align: center; padding: 2.5rem 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 1.5rem; }
   .hero h1 {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(3.5rem, 15vw, 6rem);
-    letter-spacing: 4px;
-    line-height: 1;
+    letter-spacing: 4px; line-height: 1;
     background: linear-gradient(135deg, #ff6b35, #ffa500, #ff3860);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: none;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .hero .tagline {
-    font-size: 0.95rem;
-    color: rgba(255,255,255,0.45);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-top: 0.4rem;
-  }
-
-  /* Game display */
+  .hero .tagline { font-size: 0.95rem; color: rgba(255,255,255,0.45); letter-spacing: 2px; text-transform: uppercase; margin-top: 0.4rem; }
   #name {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(3rem, 18vw, 5.5rem);
-    text-align: center;
-    letter-spacing: 2px;
-    line-height: 1;
-    transition: opacity 0.15s;
-    color: white;
+    text-align: center; letter-spacing: 2px; line-height: 1;
+    transition: opacity 0.15s; color: white;
     text-shadow: 0 0 40px rgba(255,107,53,0.4);
   }
   #name.unhinged-active {
     background: linear-gradient(135deg, #ff3860, #ff6b35);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     text-shadow: none;
   }
-  #task-label {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #ffa500;
-    min-height: 1.8rem;
-    text-align: center;
-    margin-top: 0.5rem;
-    padding: 0 1rem;
-    letter-spacing: 0.5px;
-  }
-  #bund-label {
-    font-size: 1rem;
-    color: #ff3860;
-    font-weight: 700;
-    min-height: 1.4rem;
-    text-align: center;
-    margin-top: 0.25rem;
-  }
+  #task-label { font-size: 1.15rem; font-weight: 700; color: #ffa500; min-height: 1.8rem; text-align: center; margin-top: 0.5rem; padding: 0 1rem; letter-spacing: 0.5px; }
+  #bund-label { font-size: 1rem; color: #ff3860; font-weight: 700; min-height: 1.4rem; text-align: center; margin-top: 0.25rem; }
   #emoji { font-size: 2.5rem; margin-top: 0.5rem; }
-
-  /* Progress */
-  #progress {
-    width: 100%;
-    max-width: 320px;
-    height: 4px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 4px;
-    margin-top: 1.25rem;
-    overflow: hidden;
-  }
-  #bar {
-    height: 100%;
-    background: linear-gradient(90deg, #ff6b35, #ffa500);
-    border-radius: 4px;
-    transition: width 0.1s linear;
-  }
+  #progress { width: 100%; max-width: 320px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 4px; margin-top: 1.25rem; overflow: hidden; }
+  #bar { height: 100%; background: linear-gradient(90deg, #ff6b35, #ffa500); border-radius: 4px; transition: width 0.1s linear; }
   #countdown { font-size: 0.9rem; color: rgba(255,255,255,0.35); margin-top: 0.5rem; letter-spacing: 1px; }
 
-  /* Mode toggle */
-  #mode-toggle {
-    margin-top: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.5);
-  }
+  #mode-toggle { margin-top: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; color: rgba(255,255,255,0.5); }
   .toggle-switch { position: relative; width: 48px; height: 26px; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .slider-track {
-    position: absolute; cursor: pointer; inset: 0;
-    background: rgba(255,255,255,0.1);
-    border-radius: 26px; transition: background 0.3s;
-  }
-  .slider-track:before {
-    content: ''; position: absolute;
-    width: 20px; height: 20px; left: 3px; top: 3px;
-    background: white; border-radius: 50%; transition: transform 0.3s;
-  }
+  .slider-track { position: absolute; cursor: pointer; inset: 0; background: rgba(255,255,255,0.1); border-radius: 26px; transition: background 0.3s; }
+  .slider-track:before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.3s; }
   input:checked + .slider-track { background: #ff3860; }
   input:checked + .slider-track:before { transform: translateX(22px); }
   #mode-label { transition: color 0.3s; }
   #mode-label.unhinged { color: #ff3860; font-weight: 700; }
 
-  /* Settings */
-  .settings {
-    margin-top: 1.25rem;
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .setting { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+  .settings { margin-top: 1.25rem; display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+  .setting { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; transition: opacity 0.3s; }
+  .setting.disabled { opacity: 0.25; pointer-events: none; }
   .setting label { font-size: 0.75rem; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-transform: uppercase; }
   .setting input[type=range] { width: 120px; accent-color: #ff6b35; }
   .setting span { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 600; }
 
-  /* Start button */
+  .btn-row { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
   button.primary {
-    margin-top: 1.5rem;
     padding: 0.9rem 3rem;
     font-size: 1.1rem;
     font-family: 'Bebas Neue', sans-serif;
     letter-spacing: 3px;
     background: linear-gradient(135deg, #ff6b35, #ff3860);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
+    color: white; border: none; border-radius: 50px; cursor: pointer;
     box-shadow: 0 4px 24px rgba(255,107,53,0.35);
     transition: transform 0.15s, box-shadow 0.15s;
   }
   button.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,107,53,0.5); }
   button.primary:active { transform: translateY(0); }
-
-  /* Divider */
-  .divider {
-    width: 100%;
-    border: none;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    margin: 1.75rem 0 1.25rem;
-  }
-
-  /* Chip section */
-  #chip-section { width: 100%; }
-  #chip-section h3 {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.3);
-    font-weight: 600;
-    text-align: center;
+  button#nextBtn {
+    padding: 0.9rem 1.5rem;
+    font-size: 1.1rem;
+    font-family: 'Bebas Neue', sans-serif;
     letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 0.75rem;
-  }
-  #add-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
-  #nameInput {
-    flex: 1; padding: 0.55rem 0.9rem;
-    border-radius: 50px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.06);
-    color: white; font-size: 0.95rem; outline: none;
-    transition: border-color 0.2s;
-  }
-  #nameInput::placeholder { color: rgba(255,255,255,0.25); }
-  #nameInput:focus { border-color: #ff6b35; }
-  #addBtn {
-    padding: 0.55rem 1.1rem;
-    background: rgba(255,107,53,0.2);
-    color: #ff6b35;
-    border: 1px solid rgba(255,107,53,0.3);
-    border-radius: 50px;
-    font-size: 1.2rem;
-    cursor: pointer;
+    background: rgba(255,107,53,0.15);
+    color: #ff6b35; border: 1px solid rgba(255,107,53,0.4);
+    border-radius: 50px; cursor: pointer;
+    display: none;
     transition: background 0.2s;
   }
+  button#nextBtn:hover { background: rgba(255,107,53,0.3); }
+
+  .divider { width: 100%; border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 1.75rem 0 1.25rem; }
+  #chip-section { width: 100%; }
+  #chip-section h3 { font-size: 0.7rem; color: rgba(255,255,255,0.3); font-weight: 600; text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.75rem; }
+  #add-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+  #nameInput { flex: 1; padding: 0.55rem 0.9rem; border-radius: 50px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: white; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+  #nameInput::placeholder { color: rgba(255,255,255,0.25); }
+  #nameInput:focus { border-color: #ff6b35; }
+  #addBtn { padding: 0.55rem 1.1rem; background: rgba(255,107,53,0.2); color: #ff6b35; border: 1px solid rgba(255,107,53,0.3); border-radius: 50px; font-size: 1.2rem; cursor: pointer; transition: background 0.2s; }
   #addBtn:hover { background: rgba(255,107,53,0.35); }
   #chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
-  .chip {
-    display: flex; align-items: center; gap: 0.35rem;
-    padding: 0.35rem 0.8rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.45);
-    transition: all 0.15s;
-    user-select: none;
-  }
+  .chip { display: flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.8rem; border-radius: 50px; font-size: 0.85rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.45); transition: all 0.15s; user-select: none; }
   .chip:hover { border-color: rgba(255,107,53,0.4); color: rgba(255,255,255,0.7); }
   .chip.active { background: rgba(255,107,53,0.2); border-color: #ff6b35; color: white; }
   .chip .remove { font-size: 0.7rem; opacity: 0.5; margin-left: 2px; }
@@ -254,7 +128,6 @@
 </head>
 <body>
 <div class="content">
-
   <div class="hero">
     <h1>Mummegumme</h1>
     <div class="tagline">Ingen slipper tørt fra det</div>
@@ -277,7 +150,7 @@
   </div>
 
   <div class="settings">
-    <div class="setting">
+    <div class="setting" id="intervalSetting">
       <label>Interval</label>
       <input type="range" id="stepRange" min="1" max="30" value="5" oninput="updateSettings()">
       <span id="stepVal">5 sek</span>
@@ -289,7 +162,10 @@
     </div>
   </div>
 
-  <button class="primary" onclick="start()">Start</button>
+  <div class="btn-row">
+    <button class="primary" onclick="start()">Start</button>
+    <button id="nextBtn" onclick="nextUnhinged()">Næste →</button>
+  </div>
 
   <hr class="divider">
 
@@ -303,7 +179,6 @@
     <div id="active-label">Ingen valgt</div>
     <div id="save-hint"></div>
   </div>
-
 </div>
 
 <script>
@@ -319,9 +194,10 @@
   ];
 
   const STORAGE_KEY = 'mummegumme_names';
-  let allNames = [];
-  const active = new Set();
+  let allNames = [], active = new Set();
   let STEP = 5, TOTAL = 60, isUnhinged = false, audioCtx = null;
+  let interval, timeout, tick;
+  let unhingedRunning = false, unhingedPicks = 0, unhingedMax = 0;
 
   function loadNames() {
     try { const s = localStorage.getItem(STORAGE_KEY); if (s) allNames = JSON.parse(s); } catch(e) {}
@@ -349,8 +225,7 @@
     if (!name || allNames.includes(name)) { input.value=''; return; }
     allNames.push(name);
     allNames.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-    active.add(name);
-    saveNames(); input.value=''; renderChips();
+    active.add(name); saveNames(); input.value=''; renderChips();
   }
 
   function removeName(name) {
@@ -366,8 +241,8 @@
 
   function toggleMode() {
     isUnhinged = document.getElementById('modeCheck').checked;
-    const label = document.getElementById('mode-label');
-    label.className = isUnhinged ? 'unhinged' : '';
+    document.getElementById('mode-label').className = isUnhinged ? 'unhinged' : '';
+    document.getElementById('intervalSetting').className = isUnhinged ? 'setting disabled' : 'setting';
   }
 
   function updateSettings() {
@@ -411,19 +286,6 @@
     });
   }
 
-  function speakName(name, task, isFinal) {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const msg = new SpeechSynthesisUtterance();
-    if (isFinal && !isUnhinged) msg.text = name + ' skal bunde!';
-    else if (task) msg.text = name + '! ' + task;
-    else msg.text = name;
-    msg.lang='da-DK'; msg.rate=isFinal?0.85:1.05; msg.pitch=isFinal?0.8:1.1;
-    window.speechSynthesis.speak(msg);
-  }
-
-  let interval, timeout, tick;
-
   function pick(isFinal) {
     const persons = [...active];
     const el = document.getElementById('name');
@@ -437,9 +299,39 @@
       document.getElementById('emoji').textContent = isFinal ? '\uD83D\uDC80' : (isUnhinged ? '\uD83D\uDD25' : '\uD83C\uDF7A');
       document.getElementById('bund-label').textContent = isFinal && !isUnhinged ? chosen + ' skal BUNDE! \uD83D\uDC80\uD83C\uDF7A' : '';
       el.style.opacity = 1;
-      if (isFinal) { playFanfare(); setTimeout(() => speakName(chosen, task, true), 900); }
-      else { isUnhinged ? playUnhingedPop() : playPop(); speakName(chosen, task, false); }
+      if (isFinal) playFanfare();
+      else isUnhinged ? playUnhingedPop() : playPop();
     }, 200);
+  }
+
+  // Unhinged: manual mode — X picks over TOTAL seconds, user taps next
+  function startUnhinged() {
+    unhingedRunning = true;
+    unhingedPicks = 0;
+    unhingedMax = Math.floor(TOTAL / 10); // rough number of turns
+    document.getElementById('nextBtn').style.display = 'block';
+    document.getElementById('countdown').textContent = '';
+    document.getElementById('progress').style.display = 'none';
+    pick(false);
+    // Set a total time limit
+    timeout = setTimeout(() => endGame(), TOTAL * 1000);
+  }
+
+  function nextUnhinged() {
+    if (!unhingedRunning) return;
+    unhingedPicks++;
+    pick(false);
+    playUnhingedPop();
+  }
+
+  function endGame() {
+    clearTimeout(timeout);
+    unhingedRunning = false;
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('progress').style.display = '';
+    updateBar(100);
+    pick(true);
+    document.getElementById('countdown').textContent = 'Færdig! \uD83C\uDF89';
   }
 
   function start() {
@@ -448,6 +340,13 @@
     clearInterval(interval); clearInterval(tick); clearTimeout(timeout);
     document.getElementById('bund-label').textContent = '';
     document.getElementById('task-label').textContent = '';
+    document.getElementById('progress').style.display = '';
+
+    if (isUnhinged) {
+      startUnhinged();
+      return;
+    }
+
     let elapsed = 0;
     pick(false); updateBar(0);
     document.getElementById('countdown').textContent = 'Stopper om ' + TOTAL + ' sek';
