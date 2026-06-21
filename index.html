@@ -7,123 +7,184 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
     min-height: 100vh;
-    background: #0d0d0d;
+    background: #f5ede0;
     font-family: 'Inter', sans-serif;
-    color: white;
+    color: #1a1008;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 0 1rem 3rem;
     overflow-x: hidden;
   }
+
+  /* Paper grain texture */
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(ellipse at 20% 50%, rgba(230,80,30,0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(255,160,0,0.1) 0%, transparent 55%),
-                radial-gradient(ellipse at 60% 80%, rgba(180,20,40,0.12) 0%, transparent 50%);
-    animation: bgPulse 8s ease-in-out infinite alternate;
-    z-index: 0; pointer-events: none;
-  }
-  @keyframes bgPulse { 0% { opacity: 0.6; } 100% { opacity: 1; } }
-  body::after {
-    content: '';
     position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    opacity: 0.4; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
+    opacity: 1; z-index: 0; pointer-events: none;
   }
+
   .content { position: relative; z-index: 1; width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; }
-  .hero { width: 100%; text-align: center; padding: 2.5rem 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 1.5rem; }
+
+  /* Hero */
+  .hero {
+    width: 100%; text-align: center;
+    padding: 2.5rem 1rem 1.5rem;
+    border-bottom: 2px solid rgba(26,16,8,0.1);
+    margin-bottom: 1.75rem;
+  }
   .hero h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3.5rem, 15vw, 6rem);
-    letter-spacing: 4px; line-height: 1;
-    background: linear-gradient(135deg, #ff6b35, #ffa500, #ff3860);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    font-size: clamp(4rem, 18vw, 7rem);
+    letter-spacing: 5px; line-height: 1;
+    color: #c0392b;
   }
-  .hero .tagline { font-size: 0.95rem; color: rgba(255,255,255,0.45); letter-spacing: 2px; text-transform: uppercase; margin-top: 0.4rem; }
+  .hero .tagline {
+    font-size: 0.8rem;
+    color: rgba(26,16,8,0.45);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+  }
+
+  /* Game display */
   #name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3rem, 18vw, 5.5rem);
+    font-size: clamp(3.5rem, 20vw, 6.5rem);
     text-align: center; letter-spacing: 2px; line-height: 1;
-    transition: opacity 0.15s; color: white;
-    text-shadow: 0 0 40px rgba(255,107,53,0.4);
+    transition: opacity 0.15s;
+    color: #1a1008;
   }
-  #name.unhinged-active {
-    background: linear-gradient(135deg, #ff3860, #ff6b35);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    text-shadow: none;
-  }
-  #task-label { font-size: 1.15rem; font-weight: 700; color: #ffa500; min-height: 1.8rem; text-align: center; margin-top: 0.5rem; padding: 0 1rem; letter-spacing: 0.5px; }
-  #bund-label { font-size: 1rem; color: #ff3860; font-weight: 700; min-height: 1.4rem; text-align: center; margin-top: 0.25rem; }
-  #emoji { font-size: 2.5rem; margin-top: 0.5rem; }
-  #progress { width: 100%; max-width: 320px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 4px; margin-top: 1.25rem; overflow: hidden; }
-  #bar { height: 100%; background: linear-gradient(90deg, #ff6b35, #ffa500); border-radius: 4px; transition: width 0.1s linear; }
-  #countdown { font-size: 0.9rem; color: rgba(255,255,255,0.35); margin-top: 0.5rem; letter-spacing: 1px; }
+  #name.unhinged-active { color: #c0392b; }
 
-  #mode-toggle { margin-top: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; color: rgba(255,255,255,0.5); }
+  #task-label {
+    font-size: 1.2rem; font-weight: 700;
+    color: #c0392b;
+    min-height: 1.8rem; text-align: center;
+    margin-top: 0.5rem; padding: 0 1rem;
+  }
+  #bund-label {
+    font-size: 1rem; color: #c0392b; font-weight: 700;
+    min-height: 1.4rem; text-align: center; margin-top: 0.25rem;
+  }
+  #emoji { font-size: 2.5rem; margin-top: 0.5rem; }
+
+  #progress {
+    width: 100%; max-width: 320px; height: 5px;
+    background: rgba(26,16,8,0.1);
+    border-radius: 4px; margin-top: 1.25rem; overflow: hidden;
+  }
+  #bar { height: 100%; background: #c0392b; border-radius: 4px; transition: width 0.1s linear; }
+  #countdown { font-size: 0.85rem; color: rgba(26,16,8,0.4); margin-top: 0.5rem; letter-spacing: 1px; }
+
+  /* Mode toggle */
+  #mode-toggle {
+    margin-top: 1.5rem; display: flex; align-items: center;
+    gap: 0.75rem; font-size: 0.9rem; color: rgba(26,16,8,0.5);
+    font-weight: 600;
+  }
   .toggle-switch { position: relative; width: 48px; height: 26px; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .slider-track { position: absolute; cursor: pointer; inset: 0; background: rgba(255,255,255,0.1); border-radius: 26px; transition: background 0.3s; }
-  .slider-track:before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.3s; }
-  input:checked + .slider-track { background: #ff3860; }
+  .slider-track {
+    position: absolute; cursor: pointer; inset: 0;
+    background: rgba(26,16,8,0.15); border-radius: 26px; transition: background 0.3s;
+  }
+  .slider-track:before {
+    content: ''; position: absolute; width: 20px; height: 20px;
+    left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.3s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  input:checked + .slider-track { background: #c0392b; }
   input:checked + .slider-track:before { transform: translateX(22px); }
-  #mode-label { transition: color 0.3s; }
-  #mode-label.unhinged { color: #ff3860; font-weight: 700; }
+  #mode-label.unhinged { color: #c0392b; font-weight: 700; }
 
+  /* Settings */
   .settings { margin-top: 1.25rem; display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
   .setting { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; transition: opacity 0.3s; }
   .setting.disabled { opacity: 0.25; pointer-events: none; }
-  .setting label { font-size: 0.75rem; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-transform: uppercase; }
-  .setting input[type=range] { width: 120px; accent-color: #ff6b35; }
-  .setting span { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 600; }
+  .setting label { font-size: 0.7rem; color: rgba(26,16,8,0.4); letter-spacing: 2px; text-transform: uppercase; }
+  .setting input[type=range] { width: 120px; accent-color: #c0392b; }
+  .setting span { font-size: 0.85rem; color: rgba(26,16,8,0.7); font-weight: 700; }
 
+  /* Buttons */
   .btn-row { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
   button.primary {
     padding: 0.9rem 3rem;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-family: 'Bebas Neue', sans-serif;
     letter-spacing: 3px;
-    background: linear-gradient(135deg, #ff6b35, #ff3860);
-    color: white; border: none; border-radius: 50px; cursor: pointer;
-    box-shadow: 0 4px 24px rgba(255,107,53,0.35);
-    transition: transform 0.15s, box-shadow 0.15s;
+    background: #c0392b;
+    color: white; border: none; border-radius: 4px; cursor: pointer;
+    box-shadow: 0 3px 0 #922b21;
+    transition: transform 0.1s, box-shadow 0.1s;
   }
-  button.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,107,53,0.5); }
-  button.primary:active { transform: translateY(0); }
+  button.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 0 #922b21; }
+  button.primary:active { transform: translateY(2px); box-shadow: 0 1px 0 #922b21; }
+
   button#nextBtn {
     padding: 0.9rem 1.5rem;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-family: 'Bebas Neue', sans-serif;
     letter-spacing: 2px;
-    background: rgba(255,107,53,0.15);
-    color: #ff6b35; border: 1px solid rgba(255,107,53,0.4);
-    border-radius: 50px; cursor: pointer;
+    background: white;
+    color: #c0392b;
+    border: 2px solid #c0392b;
+    border-radius: 4px; cursor: pointer;
     display: none;
+    box-shadow: 0 3px 0 #922b21;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  button#nextBtn:hover { transform: translateY(-1px); }
+  button#nextBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #922b21; }
+
+  /* Divider */
+  .divider { width: 100%; border: none; border-top: 2px solid rgba(26,16,8,0.08); margin: 1.75rem 0 1.25rem; }
+
+  /* Chips */
+  #chip-section { width: 100%; }
+  #chip-section h3 { font-size: 0.65rem; color: rgba(26,16,8,0.35); font-weight: 700; text-align: center; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.75rem; }
+  #add-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+  #nameInput {
+    flex: 1; padding: 0.55rem 0.9rem;
+    border-radius: 4px;
+    border: 1.5px solid rgba(26,16,8,0.2);
+    background: white;
+    color: #1a1008; font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  #nameInput::placeholder { color: rgba(26,16,8,0.3); }
+  #nameInput:focus { border-color: #c0392b; }
+  #addBtn {
+    padding: 0.55rem 1.1rem;
+    background: white; color: #c0392b;
+    border: 1.5px solid #c0392b;
+    border-radius: 4px; font-size: 1.2rem; cursor: pointer;
     transition: background 0.2s;
   }
-  button#nextBtn:hover { background: rgba(255,107,53,0.3); }
+  #addBtn:hover { background: #fdf0ee; }
 
-  .divider { width: 100%; border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 1.75rem 0 1.25rem; }
-  #chip-section { width: 100%; }
-  #chip-section h3 { font-size: 0.7rem; color: rgba(255,255,255,0.3); font-weight: 600; text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.75rem; }
-  #add-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
-  #nameInput { flex: 1; padding: 0.55rem 0.9rem; border-radius: 50px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: white; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
-  #nameInput::placeholder { color: rgba(255,255,255,0.25); }
-  #nameInput:focus { border-color: #ff6b35; }
-  #addBtn { padding: 0.55rem 1.1rem; background: rgba(255,107,53,0.2); color: #ff6b35; border: 1px solid rgba(255,107,53,0.3); border-radius: 50px; font-size: 1.2rem; cursor: pointer; transition: background 0.2s; }
-  #addBtn:hover { background: rgba(255,107,53,0.35); }
   #chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
-  .chip { display: flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.8rem; border-radius: 50px; font-size: 0.85rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.45); transition: all 0.15s; user-select: none; }
-  .chip:hover { border-color: rgba(255,107,53,0.4); color: rgba(255,255,255,0.7); }
-  .chip.active { background: rgba(255,107,53,0.2); border-color: #ff6b35; color: white; }
-  .chip .remove { font-size: 0.7rem; opacity: 0.5; margin-left: 2px; }
-  .chip .remove:hover { opacity: 1; color: #ff3860; }
-  #active-label { margin-top: 0.75rem; font-size: 0.78rem; color: rgba(255,255,255,0.25); text-align: center; letter-spacing: 1px; }
-  #save-hint { margin-top: 0.3rem; font-size: 0.72rem; color: rgba(255,255,255,0.15); text-align: center; }
+  .chip {
+    display: flex; align-items: center; gap: 0.35rem;
+    padding: 0.35rem 0.85rem; border-radius: 4px;
+    font-size: 0.85rem; cursor: pointer;
+    border: 1.5px solid rgba(26,16,8,0.15);
+    background: white;
+    color: rgba(26,16,8,0.45);
+    transition: all 0.15s; user-select: none;
+    font-weight: 600;
+  }
+  .chip:hover { border-color: #c0392b; color: #c0392b; }
+  .chip.active { background: #c0392b; border-color: #c0392b; color: white; }
+  .chip .remove { font-size: 0.7rem; opacity: 0.6; margin-left: 2px; }
+  .chip.active .remove:hover { opacity: 1; }
+
+  #active-label { margin-top: 0.75rem; font-size: 0.78rem; color: rgba(26,16,8,0.3); text-align: center; letter-spacing: 1px; }
+  #save-hint { margin-top: 0.3rem; font-size: 0.72rem; color: rgba(26,16,8,0.2); text-align: center; }
 </style>
 </head>
 <body>
@@ -196,8 +257,7 @@
   const STORAGE_KEY = 'mummegumme_names';
   let allNames = [], active = new Set();
   let STEP = 5, TOTAL = 60, isUnhinged = false, audioCtx = null;
-  let interval, timeout, tick;
-  let unhingedRunning = false, unhingedPicks = 0, unhingedMax = 0;
+  let interval, timeout, tick, unhingedRunning = false;
 
   function loadNames() {
     try { const s = localStorage.getItem(STORAGE_KEY); if (s) allNames = JSON.parse(s); } catch(e) {}
@@ -304,24 +364,18 @@
     }, 200);
   }
 
-  // Unhinged: manual mode — X picks over TOTAL seconds, user taps next
   function startUnhinged() {
     unhingedRunning = true;
-    unhingedPicks = 0;
-    unhingedMax = Math.floor(TOTAL / 10); // rough number of turns
     document.getElementById('nextBtn').style.display = 'block';
     document.getElementById('countdown').textContent = '';
     document.getElementById('progress').style.display = 'none';
     pick(false);
-    // Set a total time limit
     timeout = setTimeout(() => endGame(), TOTAL * 1000);
   }
 
   function nextUnhinged() {
     if (!unhingedRunning) return;
-    unhingedPicks++;
     pick(false);
-    playUnhingedPop();
   }
 
   function endGame() {
@@ -342,10 +396,7 @@
     document.getElementById('task-label').textContent = '';
     document.getElementById('progress').style.display = '';
 
-    if (isUnhinged) {
-      startUnhinged();
-      return;
-    }
+    if (isUnhinged) { startUnhinged(); return; }
 
     let elapsed = 0;
     pick(false); updateBar(0);
