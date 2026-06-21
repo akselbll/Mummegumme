@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hvem skal drikke?</title>
+<title>Mummegumme</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -18,13 +18,23 @@
     color: white;
     padding: 1rem;
   }
+  h1 { font-size: 1.4rem; color: #e94560; margin: 0 0 1rem; letter-spacing: 2px; text-transform: uppercase; }
   #name {
     font-size: 4rem;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     transition: opacity 0.2s;
     color: white;
+  }
+  #task-label {
+    font-size: 1.2rem;
+    color: #f4a261;
+    font-weight: bold;
+    min-height: 1.8rem;
+    text-align: center;
+    margin-bottom: 0.25rem;
+    padding: 0 1rem;
   }
   #bund-label {
     font-size: 1.1rem;
@@ -32,24 +42,51 @@
     font-weight: bold;
     min-height: 1.5rem;
     margin-bottom: 0.5rem;
+    text-align: center;
   }
   #emoji { font-size: 3rem; }
   #countdown { font-size: 1.2rem; color: #aaa; margin-top: 1.5rem; }
   #progress { width: 300px; height: 8px; background: #333; border-radius: 4px; margin-top: 0.75rem; overflow: hidden; }
   #bar { height: 100%; background: #e94560; border-radius: 4px; transition: width 0.1s linear; }
-  button.primary {
-    margin-top: 1.5rem;
-    padding: 0.75rem 2rem;
-    font-size: 1rem;
-    background: #e94560;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+
+  /* Mode toggle */
+  #mode-toggle {
+    margin-top: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
   }
-  button.primary:hover { background: #c73652; }
+  .toggle-switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .slider-track {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #333;
+    border-radius: 28px;
+    transition: background 0.3s;
+  }
+  .slider-track:before {
+    content: '';
+    position: absolute;
+    width: 22px; height: 22px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+  }
+  input:checked + .slider-track { background: #e94560; }
+  input:checked + .slider-track:before { transform: translateX(24px); }
+  #mode-label { color: #aaa; transition: color 0.3s; }
+  #mode-label.unhinged { color: #e94560; font-weight: bold; }
+
   .settings {
-    margin-top: 1.5rem;
+    margin-top: 1.25rem;
     display: flex;
     gap: 1.5rem;
     flex-wrap: wrap;
@@ -59,18 +96,53 @@
   .setting label { font-size: 0.85rem; color: white; }
   .setting input[type=range] { width: 130px; accent-color: #e94560; }
   .setting span { font-size: 0.9rem; color: white; font-weight: bold; }
+
+  button.primary {
+    margin-top: 1.25rem;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  button.primary:hover { background: #c73652; }
+
   #chip-section {
     margin-top: 1.5rem;
     width: 100%;
-    max-width: 420px;
+    max-width: 460px;
   }
   #chip-section h3 {
     font-size: 0.95rem;
     color: #aaa;
     font-weight: normal;
     text-align: center;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
   }
+  #add-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+  #nameInput {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 2px solid #444;
+    background: #2a2a4a;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+  }
+  #nameInput:focus { border-color: #e94560; }
+  #addBtn {
+    padding: 0.5rem 1rem;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  #addBtn:hover { background: #c73652; }
   #chips {
     display: flex;
     flex-wrap: wrap;
@@ -78,7 +150,10 @@
     justify-content: center;
   }
   .chip {
-    padding: 0.4rem 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
     border-radius: 20px;
     font-size: 0.9rem;
     cursor: pointer;
@@ -88,21 +163,31 @@
     transition: all 0.15s;
     user-select: none;
   }
-  .chip.active {
-    background: #e94560;
-    border-color: #e94560;
-    color: white;
-  }
-  #active-label { margin-top: 1rem; font-size: 0.85rem; color: #666; text-align: center; }
+  .chip.active { background: #e94560; border-color: #e94560; color: white; }
+  .chip .remove { font-size: 0.75rem; opacity: 0.7; margin-left: 2px; }
+  .chip .remove:hover { opacity: 1; }
+  #active-label { margin-top: 0.75rem; font-size: 0.85rem; color: #666; text-align: center; }
+  #save-hint { margin-top: 0.4rem; font-size: 0.78rem; color: #555; text-align: center; }
 </style>
 </head>
 <body>
 
-<div id="name">V&#230;lg navne</div>
+<h1>Mummegumme</h1>
+<div id="name">Vælg navne</div>
+<div id="task-label"></div>
 <div id="bund-label"></div>
 <div id="emoji"></div>
 <div id="progress"><div id="bar" style="width:100%"></div></div>
 <div id="countdown"></div>
+
+<div id="mode-toggle">
+  <span>Normal</span>
+  <label class="toggle-switch">
+    <input type="checkbox" id="modeCheck" onchange="toggleMode()">
+    <span class="slider-track"></span>
+  </label>
+  <span id="mode-label">Unhinged</span>
+</div>
 
 <div class="settings">
   <div class="setting">
@@ -120,23 +205,126 @@
 <button class="primary" onclick="start()">Start</button>
 
 <div id="chip-section">
-  <h3>V&#230;lg deltagere</h3>
+  <h3>Deltagere</h3>
+  <div id="add-row">
+    <input type="text" id="nameInput" placeholder="Tilføj navn..." onkeydown="if(event.key==='Enter')addName()">
+    <button id="addBtn" onclick="addName()">+</button>
+  </div>
   <div id="chips"></div>
   <div id="active-label">Ingen valgt</div>
+  <div id="save-hint"></div>
 </div>
 
 <script>
-  const allNames = [
-    'ABC','cille','Daniel','Emil','Emse','Espersen',
-    'Fred','Gesser','Jepsen','Jos\u00e9','J\u00f8rgensen',
-    'Kimose','Larsen','marcuzz','matty-natty','Morten',
-    'Nico','Okke','SEB','Vadmand'
+  // --- Unhinged tasks ---
+  const unhingedTasks = [
+    'BUNDE!',
+    'Alle drikker!',
+    'Vælg en der skal bunde med dig!',
+    'De to ved siden af dig drikker!',
+    'Du bestemmer en regel resten af runden!',
+    'Byt drink med naboen og drik den!',
+    'Alle med åbent hår drikker!',
+    'Sæt en regel — bryder nogen den, bunder de!',
+    'Ring til en der ikke er her — de bestemmer hvem der drikker!',
+    'Sidste der rejser sig drikker!',
+    'BUNDE!',
+    'Alle drikker dobbelt!',
+    'Du vælger to der skal bunde!',
+    'BUNDE — og tag en til med!',
+    'Fortæl en hemmelighed eller bund!',
   ];
 
+  // --- State ---
+  const STORAGE_KEY = 'mummegumme_names';
+  let allNames = [];
   const active = new Set();
   let STEP = 5, TOTAL = 60;
+  let isUnhinged = false;
   let audioCtx = null;
 
+  // --- Load saved names ---
+  function loadNames() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) allNames = JSON.parse(saved);
+    } catch(e) {}
+    if (allNames.length === 0) {
+      allNames = ['ABC','cille','Daniel','Emil','Emse','Espersen','Fred','Gesser','Jepsen','José','Jørgensen','Kimose','Larsen','marcuzz','matty-natty','Morten','Nico','Okke','SEB','Vadmand'];
+    }
+    renderChips();
+  }
+
+  function saveNames() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allNames)); } catch(e) {}
+  }
+
+  // --- Chips ---
+  function renderChips() {
+    const el = document.getElementById('chips');
+    el.innerHTML = '';
+    allNames.forEach(name => {
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (active.has(name) ? ' active' : '');
+      chip.innerHTML = name + '<span class="remove" onclick="event.stopPropagation();removeName(\'' + name.replace(/'/g,"\\'") + '\')">&#x2715;</span>';
+      chip.onclick = () => toggleActive(name, chip);
+      el.appendChild(chip);
+    });
+    updateLabel();
+  }
+
+  function toggleActive(name, chip) {
+    if (active.has(name)) { active.delete(name); chip.classList.remove('active'); }
+    else { active.add(name); chip.classList.add('active'); }
+    updateLabel();
+  }
+
+  function addName() {
+    const input = document.getElementById('nameInput');
+    const name = input.value.trim();
+    if (!name || allNames.includes(name)) { input.value = ''; return; }
+    allNames.push(name);
+    allNames.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    active.add(name);
+    saveNames();
+    input.value = '';
+    renderChips();
+  }
+
+  function removeName(name) {
+    allNames = allNames.filter(n => n !== name);
+    active.delete(name);
+    saveNames();
+    renderChips();
+  }
+
+  function updateLabel() {
+    const el = document.getElementById('active-label');
+    el.textContent = active.size === 0 ? 'Ingen valgt' : active.size + ' valgt';
+    if (active.size === 0) {
+      document.getElementById('name').textContent = 'Vælg navne';
+      document.getElementById('emoji').textContent = '';
+    }
+    document.getElementById('save-hint').textContent = allNames.length > 0 ? 'Navne gemmes automatisk til næste gang' : '';
+  }
+
+  // --- Mode ---
+  function toggleMode() {
+    isUnhinged = document.getElementById('modeCheck').checked;
+    const label = document.getElementById('mode-label');
+    label.textContent = 'Unhinged';
+    label.className = isUnhinged ? 'unhinged' : '';
+  }
+
+  // --- Settings ---
+  function updateSettings() {
+    STEP = parseInt(document.getElementById('stepRange').value);
+    TOTAL = parseInt(document.getElementById('totalRange').value);
+    document.getElementById('stepVal').textContent = STEP + ' sek';
+    document.getElementById('totalVal').textContent = TOTAL + ' sek';
+  }
+
+  // --- Audio ---
   function getAudioCtx() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     return audioCtx;
@@ -146,15 +334,28 @@
     const ctx = getAudioCtx();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    osc.connect(gain); gain.connect(ctx.destination);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(600, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.05);
     gain.gain.setValueAtTime(0.3, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.15);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.15);
+  }
+
+  function playUnhingedPop() {
+    const ctx = getAudioCtx();
+    [0, 0.08, 0.16].forEach((delay, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.value = 400 + i * 150;
+      const t = ctx.currentTime + delay;
+      gain.gain.setValueAtTime(0.2, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      osc.start(t); osc.stop(t + 0.12);
+    });
   }
 
   function playFanfare() {
@@ -164,61 +365,31 @@
     notes.forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+      osc.connect(gain); gain.connect(ctx.destination);
       osc.type = 'triangle';
       osc.frequency.value = freq;
       const t = ctx.currentTime + times[i];
       gain.gain.setValueAtTime(0, t);
       gain.gain.linearRampToValueAtTime(0.4, t + 0.05);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
-      osc.start(t);
-      osc.stop(t + 0.3);
+      osc.start(t); osc.stop(t + 0.3);
     });
   }
 
-  function speakName(name, isFinal) {
+  function speakName(name, task, isFinal) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const msg = new SpeechSynthesisUtterance();
-    msg.text = isFinal ? name + ' skal bunde!' : name;
+    if (isFinal && !isUnhinged) msg.text = name + ' skal bunde!';
+    else if (task) msg.text = name + '! ' + task;
+    else msg.text = name;
     msg.lang = 'da-DK';
-    msg.rate = isFinal ? 0.9 : 1.1;
+    msg.rate = isFinal ? 0.85 : 1.05;
     msg.pitch = isFinal ? 0.8 : 1.1;
     window.speechSynthesis.speak(msg);
   }
 
-  function updateSettings() {
-    STEP = parseInt(document.getElementById('stepRange').value);
-    TOTAL = parseInt(document.getElementById('totalRange').value);
-    document.getElementById('stepVal').textContent = STEP + ' sek';
-    document.getElementById('totalVal').textContent = TOTAL + ' sek';
-  }
-
-  const chipsEl = document.getElementById('chips');
-  allNames.forEach(name => {
-    const chip = document.createElement('div');
-    chip.className = 'chip';
-    chip.textContent = name;
-    chip.onclick = () => {
-      if (active.has(name)) { active.delete(name); chip.classList.remove('active'); }
-      else { active.add(name); chip.classList.add('active'); }
-      updateLabel();
-    };
-    chipsEl.appendChild(chip);
-  });
-
-  function updateLabel() {
-    const el = document.getElementById('active-label');
-    if (active.size === 0) {
-      el.textContent = 'Ingen valgt';
-      document.getElementById('name').textContent = 'V\u00e6lg navne';
-      document.getElementById('emoji').textContent = '';
-    } else {
-      el.textContent = active.size + ' valgt';
-    }
-  }
-
+  // --- Game ---
   let interval, timeout, tick;
 
   function pick(isFinal) {
@@ -227,25 +398,31 @@
     el.style.opacity = 0;
     setTimeout(() => {
       const chosen = persons[Math.floor(Math.random() * persons.length)];
+      let task = null;
+      if (isUnhinged) {
+        task = unhingedTasks[Math.floor(Math.random() * unhingedTasks.length)];
+      }
       el.textContent = chosen;
-      document.getElementById('emoji').textContent = isFinal ? '\uD83D\uDC80' : '\uD83C\uDF7A';
-      document.getElementById('bund-label').textContent = isFinal ? chosen + ' skal BUNDE! \uD83D\uDC80\uD83C\uDF7A' : '';
+      document.getElementById('task-label').textContent = task || '';
+      document.getElementById('emoji').textContent = isFinal ? '\uD83D\uDC80' : (isUnhinged ? '\uD83D\uDD25' : '\uD83C\uDF7A');
+      document.getElementById('bund-label').textContent = isFinal && !isUnhinged ? chosen + ' skal BUNDE! \uD83D\uDC80\uD83C\uDF7A' : '';
       el.style.opacity = 1;
       if (isFinal) {
         playFanfare();
-        setTimeout(() => speakName(chosen, true), 900);
+        setTimeout(() => speakName(chosen, task, true), 900);
       } else {
-        playPop();
-        speakName(chosen, false);
+        isUnhinged ? playUnhingedPop() : playPop();
+        speakName(chosen, task, false);
       }
     }, 200);
   }
 
   function start() {
-    if (active.size === 0) { alert('V\u00e6lg mindst \u00e9t navn f\u00f8rst!'); return; }
+    if (active.size === 0) { alert('Vælg mindst ét navn først!'); return; }
     getAudioCtx();
     clearInterval(interval); clearInterval(tick); clearTimeout(timeout);
     document.getElementById('bund-label').textContent = '';
+    document.getElementById('task-label').textContent = '';
     let elapsed = 0;
     pick(false); updateBar(0);
     document.getElementById('countdown').textContent = 'Stopper om ' + TOTAL + ' sek';
@@ -258,7 +435,7 @@
     timeout = setTimeout(() => {
       clearInterval(interval); clearInterval(tick);
       pick(true);
-      document.getElementById('countdown').textContent = 'F\u00e6rdig! \uD83C\uDF89';
+      document.getElementById('countdown').textContent = 'Færdig! \uD83C\uDF89';
       updateBar(100);
     }, TOTAL * 1000);
   }
@@ -266,6 +443,9 @@
   function updateBar(pct) {
     document.getElementById('bar').style.width = pct + '%';
   }
+
+  // --- Init ---
+  loadNames();
 </script>
 </body>
 </html>
