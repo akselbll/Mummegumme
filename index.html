@@ -210,13 +210,31 @@
     letter-spacing: 0.5px;
   }
   #supportBtn:hover { color: #c0392b; border-color: #c0392b; }
+
+  #lang-switch { width: 100%; display: flex; justify-content: flex-end; padding: 0.75rem 0.25rem 0; }
+  #langBtn {
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(26,16,8,0.5);
+    background: white;
+    border: 1.5px solid rgba(26,16,8,0.15);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  #langBtn:hover { color: #c0392b; border-color: #c0392b; }
 </style>
 </head>
 <body>
 <div class="content">
+  <div id="lang-switch">
+    <button id="langBtn" type="button" onclick="toggleLang()">EN</button>
+  </div>
   <div class="hero">
     <h1>Mummegumme</h1>
-    <div class="tagline">Ingen slipper tørt fra det</div>
+    <div class="tagline" id="tagline">Ingen slipper tørt fra det</div>
   </div>
 
   <div id="name">Vælg navne</div>
@@ -227,7 +245,7 @@
   <div id="countdown"></div>
 
   <div id="mode-toggle">
-    <span>Normal</span>
+    <span id="normalLabel">Normal</span>
     <label class="toggle-switch">
       <input type="checkbox" id="modeCheck" onchange="toggleMode()">
       <span class="slider-track"></span>
@@ -237,12 +255,12 @@
 
   <div class="settings">
     <div class="setting" id="intervalSetting">
-      <label>Interval</label>
+      <label id="intervalLabel">Interval</label>
       <input type="range" id="stepRange" min="1" max="30" value="5" oninput="updateSettings()">
       <span id="stepVal">5 sek</span>
     </div>
     <div class="setting">
-      <label>Varighed</label>
+      <label id="durationLabel">Varighed</label>
       <input type="range" id="totalRange" min="10" max="300" step="5" value="60" oninput="updateSettings()">
       <span id="totalVal">60 sek</span>
     </div>
@@ -256,7 +274,7 @@
   <hr class="divider">
 
   <div id="chip-section">
-    <h3>Deltagere</h3>
+    <h3 id="participantsLabel">Deltagere</h3>
     <div id="add-row">
       <input type="text" id="nameInput" placeholder="Tilføj navn..." autocomplete="off" autocorrect="off" autocapitalize="words">
       <button id="addBtn" type="button">+</button>
@@ -272,29 +290,107 @@
 </div>
 
 <script>
-  // Tasks where a person's name is shown
-  const namedTasks = [
-    'BUNDE!',
-    'BUNDE!',
-    'Vælg en der skal bunde med dig!',
-    'De to ved siden af dig drikker!',
-    'Byt drink med naboen og drik den!',
-    'Ring til en der ikke er her — de bestemmer hvem der drikker!',
-    'Du vælger to der skal bunde!',
-    'BUNDE — og tag en til med!',
-  ];
+  // --- Translations ---
+  const I18N = {
+    da: {
+      tagline: 'Ingen slipper tørt fra det',
+      chooseNames: 'Vælg navne',
+      normal: 'Normal',
+      unhinged: 'Unhinged',
+      interval: 'Interval',
+      duration: 'Varighed',
+      start: 'Start',
+      stop: 'Stop',
+      next: 'Næste →',
+      participants: 'Deltagere',
+      addName: 'Tilføj navn...',
+      noneSelected: 'Ingen valgt',
+      selected: 'valgt',
+      saveHint: 'Navne gemmes automatisk',
+      support: '🍺 Køb os en øl',
+      sec: 'sek',
+      stopsIn: 'Stopper om',
+      done: 'Færdig! \uD83C\uDF89',
+      mustChoose: 'Vælg mindst ét navn først!',
+      bunde: ' skal BUNDE! \uD83D\uDC80\uD83C\uDF7A',
+      namedTasks: [
+        'BUNDE!','BUNDE!','Vælg en der skal bunde med dig!',
+        'De to ved siden af dig drikker!','Byt drink med naboen og drik den!',
+        'Ring til en der ikke er her — de bestemmer hvem der drikker!',
+        'Du vælger to der skal bunde!','BUNDE — og tag en til med!',
+      ],
+      groupTasks: ['Alle drikker!','Alle drikker dobbelt!','Sidste der rejser sig drikker!'],
+    },
+    en: {
+      tagline: 'No one gets off dry',
+      chooseNames: 'Pick names',
+      normal: 'Normal',
+      unhinged: 'Unhinged',
+      interval: 'Interval',
+      duration: 'Duration',
+      start: 'Start',
+      stop: 'Stop',
+      next: 'Next →',
+      participants: 'Players',
+      addName: 'Add name...',
+      noneSelected: 'None selected',
+      selected: 'selected',
+      saveHint: 'Names are saved automatically',
+      support: '🍺 Buy us a beer',
+      sec: 'sec',
+      stopsIn: 'Stops in',
+      done: 'Done! \uD83C\uDF89',
+      mustChoose: 'Pick at least one name first!',
+      bunde: ' must DOWN IT! \uD83D\uDC80\uD83C\uDF7A',
+      namedTasks: [
+        'DOWN IT!','DOWN IT!','Pick someone to down it with you!',
+        'The two next to you drink!','Swap drinks with your neighbour and finish it!',
+        'Call someone who isn\'t here — they decide who drinks!',
+        'You pick two who must down it!','DOWN IT — and bring one more!',
+      ],
+      groupTasks: ['Everyone drinks!','Everyone drinks double!','Last to stand up drinks!'],
+    },
+  };
 
-  // Tasks with no specific person — name is hidden
-  const groupTasks = [
-    'Alle drikker!',
-    'Alle drikker dobbelt!',
-    'Sidste der rejser sig drikker!',
-  ];
+  const LANG_KEY = 'mummegumme_lang';
+  let lang = 'da';
+  try { const sl = localStorage.getItem(LANG_KEY); if (sl) lang = sl; } catch(e) {}
+
+  function t() { return I18N[lang]; }
+  function namedTasksFor() { return t().namedTasks; }
+  function groupTasksFor() { return t().groupTasks; }
 
   const STORAGE_KEY = 'mummegumme_names';
   let allNames = [], active = new Set();
   let STEP = 5, TOTAL = 60, isUnhinged = false, audioCtx = null;
   let interval, timeout, tick, unhingedRunning = false;
+
+  function applyLang() {
+    const d = t();
+    document.getElementById('langBtn').textContent = lang === 'da' ? 'EN' : 'DA';
+    document.getElementById('tagline').textContent = d.tagline;
+    document.getElementById('normalLabel').textContent = d.normal;
+    document.getElementById('mode-label').textContent = d.unhinged;
+    document.getElementById('intervalLabel').textContent = d.interval;
+    document.getElementById('durationLabel').textContent = d.duration;
+    document.getElementById('participantsLabel').textContent = d.participants;
+    document.getElementById('nameInput').placeholder = d.addName;
+    document.getElementById('supportBtn').textContent = d.support;
+    document.getElementById('nextBtn').textContent = d.next;
+    document.documentElement.lang = lang;
+    // Only reset idle text if a game isn't running
+    if (!unhingedRunning && document.getElementById('startStopBtn').textContent !== d.stop) {
+      setBtn(false);
+    }
+    updateSettings();
+    updateLabel();
+  }
+
+  function toggleLang() {
+    lang = (lang === 'da') ? 'en' : 'da';
+    try { localStorage.setItem(LANG_KEY, lang); } catch(e) {}
+    applyLang();
+  }
 
   function loadNames() {
     try { const s = localStorage.getItem(STORAGE_KEY); if (s) allNames = JSON.parse(s); } catch(e) {}
@@ -341,9 +437,10 @@
   }
 
   function updateLabel() {
-    document.getElementById('active-label').textContent = active.size === 0 ? 'Ingen valgt' : active.size + ' valgt';
-    document.getElementById('save-hint').textContent = allNames.length ? 'Navne gemmes automatisk' : '';
-    if (active.size === 0) { document.getElementById('name').textContent = 'Vælg navne'; document.getElementById('emoji').textContent = ''; }
+    const d = t();
+    document.getElementById('active-label').textContent = active.size === 0 ? d.noneSelected : active.size + ' ' + d.selected;
+    document.getElementById('save-hint').textContent = allNames.length ? d.saveHint : '';
+    if (active.size === 0 && !unhingedRunning) { document.getElementById('name').textContent = d.chooseNames; document.getElementById('emoji').textContent = ''; }
   }
 
   function toggleMode() {
@@ -355,8 +452,8 @@
   function updateSettings() {
     STEP = parseInt(document.getElementById('stepRange').value);
     TOTAL = parseInt(document.getElementById('totalRange').value);
-    document.getElementById('stepVal').textContent = STEP + ' sek';
-    document.getElementById('totalVal').textContent = TOTAL + ' sek';
+    document.getElementById('stepVal').textContent = STEP + ' ' + t().sec;
+    document.getElementById('totalVal').textContent = TOTAL + ' ' + t().sec;
   }
 
   function getAudioCtx() { if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
@@ -406,10 +503,12 @@
         // 25% chance of a group task (no name)
         isGroup = Math.random() < 0.25;
         if (isGroup) {
-          task = groupTasks[Math.floor(Math.random() * groupTasks.length)];
+          const gt = groupTasksFor();
+          task = gt[Math.floor(Math.random() * gt.length)];
         } else {
           chosen = persons[Math.floor(Math.random() * persons.length)];
-          task = namedTasks[Math.floor(Math.random() * namedTasks.length)];
+          const nt = namedTasksFor();
+          task = nt[Math.floor(Math.random() * nt.length)];
         }
       } else {
         chosen = persons[Math.floor(Math.random() * persons.length)];
@@ -419,7 +518,7 @@
       el.className = isUnhinged ? 'unhinged-active' : '';
       document.getElementById('task-label').textContent = task || '';
       document.getElementById('emoji').textContent = isFinal ? '\uD83D\uDC80' : (isUnhinged ? '\uD83D\uDD25' : '\uD83C\uDF7A');
-      document.getElementById('bund-label').textContent = isFinal && !isUnhinged ? chosen + ' skal BUNDE! \uD83D\uDC80\uD83C\uDF7A' : '';
+      document.getElementById('bund-label').textContent = isFinal && !isUnhinged ? chosen + t().bunde : '';
       el.style.opacity = 1;
       if (isFinal) playFanfare();
       else isUnhinged ? playUnhingedPop() : playPop();
@@ -447,15 +546,15 @@
     document.getElementById('progress').style.display = '';
     updateBar(100);
     pick(true);
-    document.getElementById('countdown').textContent = 'Færdig! \uD83C\uDF89';
+    document.getElementById('countdown').textContent = t().done;
     lockControls(false);
     setBtn(false);
   }
 
   function setBtn(running) {
     const btn = document.getElementById('startStopBtn');
-    if (running) { btn.textContent = 'Stop'; btn.classList.add('stop'); }
-    else { btn.textContent = 'Start'; btn.classList.remove('stop'); }
+    if (running) { btn.textContent = t().stop; btn.classList.add('stop'); }
+    else { btn.textContent = t().start; btn.classList.remove('stop'); }
   }
 
   function handleStartStop() {
@@ -467,7 +566,7 @@
     clearInterval(interval); clearInterval(tick); clearTimeout(timeout);
     unhingedRunning = false;
     document.getElementById('nextBtn').style.display = 'none';
-    document.getElementById('name').textContent = 'Vælg navne';
+    document.getElementById('name').textContent = t().chooseNames;
     document.getElementById('name').className = '';
     document.getElementById('task-label').textContent = '';
     document.getElementById('bund-label').textContent = '';
@@ -489,7 +588,7 @@
   }
 
   function start() {
-    if (active.size === 0) { alert('Vælg mindst ét navn først!'); return; }
+    if (active.size === 0) { alert(t().mustChoose); return; }
     window.scrollTo({top: 0, behavior: 'smooth'});
     getAudioCtx();
     clearInterval(interval); clearInterval(tick); clearTimeout(timeout);
@@ -503,7 +602,7 @@
     const totalStart = Date.now();
     let roundStart = Date.now();
     pick(false); updateBar(0);
-    document.getElementById('countdown').textContent = 'Stopper om ' + TOTAL + ' sek';
+    document.getElementById('countdown').textContent = t().stopsIn + ' ' + TOTAL + ' ' + t().sec;
 
     interval = setInterval(() => {
       pick(false);
@@ -515,13 +614,13 @@
       const totalElapsed = (Date.now() - totalStart) / 1000;
       updateBar(Math.min(roundElapsed / STEP * 100, 100));
       const left = Math.max(0, TOTAL - totalElapsed);
-      document.getElementById('countdown').textContent = 'Stopper om ' + Math.ceil(left) + ' sek';
+      document.getElementById('countdown').textContent = t().stopsIn + ' ' + Math.ceil(left) + ' ' + t().sec;
     }, 100);
 
     timeout = setTimeout(() => {
       clearInterval(interval); clearInterval(tick);
       pick(true);
-      document.getElementById('countdown').textContent = 'Færdig! \uD83C\uDF89';
+      document.getElementById('countdown').textContent = t().done;
       updateBar(100);
       lockControls(false);
       setBtn(false);
@@ -531,6 +630,7 @@
   function updateBar(pct) { document.getElementById('bar').style.width = pct+'%'; }
 
   loadNames();
+  applyLang();
 </script>
 </body>
 </html>
